@@ -1,3 +1,5 @@
+// lib/pages/search/search.dart
+
 import 'package:flutter/material.dart';
 
 class CustomSearchDelegate extends SearchDelegate {

@@ -1,17 +1,38 @@
+// lib/pages/home/home-page.dart
+
 import 'package:flutter/material.dart';
-import 'package:explore_mundo/destinations/destinations_page.dart';
-import 'package:explore_mundo/contact/contact_page.dart';
-import 'package:explore_mundo/about/about_page.dart';
-import 'package:explore_mundo/travel_packages/travel_packages_page.dart';
+import 'package:explore_mundo/pages/destinations/destinations_page.dart';
+import 'package:explore_mundo/pages/contact/contact_page.dart';
+import 'package:explore_mundo/pages/about/about_page.dart';
+import 'package:explore_mundo/pages/travel_packages/travel_packages_page.dart';
+import 'package:explore_mundo/custom_search_delegate.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Explore Mundo',
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: const HomePage(),
+    );
+  }
+}
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Explore Mundo'),
+        title: const Text('Pesquisar Destinos'),
+        backgroundColor: theme.primaryColor,
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -22,112 +43,79 @@ class HomePage extends StatelessWidget {
               );
             },
           ),
-        IconButton(
-          icon: const Icon(Icons.language),
-          onPressed: () => Navigator.pushNamed(context, '/destinations'),
-        ),
-        IconButton(
-          icon: const Icon(Icons.card_travel),
-          onPressed: () => Navigator.pushNamed(context, '/travel_packages'),
-        ),
-        IconButton(
-          icon: const Icon(Icons.contact_mail),
-          onPressed: () => Navigator.pushNamed(context, '/contact'),
-        ),
-        IconButton(
-          icon: const Icon(Icons.info_outline),
-          onPressed: () => Navigator.pushNamed(context, '/about'),
-        ),
-
         ],
       ),
-      body: ListView(
-        children: <Widget>[
-          GestureDetector(
-            onTap: () {
-              
-              
-            },
-            child: Image.asset(
-              'assets/images/banner.jpg', 
-              width: MediaQuery.of(context).size.width,
-              height: 240,
-              fit: BoxFit.cover,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () {
+                
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.asset(
+                  'assets/images/banner.jpg',
+                  width: MediaQuery.of(context).size.width,
+                  height: 240,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-          ),
-          
-        ],
+            _createHomeButton(
+              context,
+              icon: Icons.map,
+              text: 'Descubra lugares incríveis',
+              onTap: () => _navigateTo(context, DestinationsPage()),
+            ),
+            _createHomeButton(
+              context,
+              icon: Icons.card_travel,
+              text: 'Pacotes de Viagem',
+              onTap: () => _navigateTo(context, TravelPackagesPage()),
+            ),
+            _createHomeButton(
+              context,
+              icon: Icons.star,
+              text: 'Ofertas especiais',
+              onTap: () {
+                
+              },
+            ),
+            _createHomeButton(
+              context,
+              icon: Icons.phone,
+              text: 'Entre em Contato',
+              onTap: () => _navigateTo(context, ContactPage()),
+            ),
+            _createHomeButton(
+              context,
+              icon: Icons.info_outline,
+              text: 'Sobre Nós',
+              onTap: () => _navigateTo(context, AboutPage()),
+            ),
+            
+            
+          ],
+        ),
       ),
     );
   }
+
+  Widget _createHomeButton(BuildContext context, {required IconData icon, required String text, required VoidCallback onTap}) {
+    return Card(
+      elevation: 2.0,
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: ListTile(
+        leading: Icon(icon, color: Theme.of(context).primaryColor),
+        title: Text(text),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  void _navigateTo(BuildContext context, Widget page) {
+  Navigator.of(context).push(MaterialPageRoute(builder: (context) => page));
+}
 }
 
-class CustomSearchDelegate extends SearchDelegate<String> {
-  final List<String> destinations = [
-    'Paris', 'New York', 'Sydney', 'Tokyo', 'Londres', 'Rio de Janeiro',
-  ];
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      if (query.isNotEmpty)
-        IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            query = '';
-            showSuggestions(context);
-          },
-        ),
-    ];
-  }
-
-    @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, '');
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    final List<String> results = destinations
-      .where((destination) => destination.toLowerCase().contains(query.toLowerCase()))
-      .toList();
-
-    return ListView.builder(
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(results[index]),
-          onTap: () {
-            close(context, results[index]);
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final List<String> suggestions = query.isEmpty
-      ? destinations
-      : destinations.where((destination) => destination.toLowerCase().contains(query.toLowerCase())).toList();
-
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) {
-        final String suggestion = suggestions[index];
-        return ListTile(
-          title: Text(suggestion),
-          onTap: () {
-            query = suggestion;
-            showResults(context);
-          },
-        );
-      },
-    );
-  }
-}
